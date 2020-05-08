@@ -1,6 +1,7 @@
 package com.seint.beeceptor.view
 
 import android.content.Context
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -44,6 +45,9 @@ class ArticleListAdapter(private val context: Context) : RecyclerView.Adapter<Ar
         var dataPosition = 0
         init {
             itemView?.setOnClickListener {
+                var intent = Intent(context,ArticleDetailActivity::class.java)
+                intent.putExtra("ARTICLE",articleList.get(dataPosition))
+                context.startActivity(intent)
             }
         }
     }

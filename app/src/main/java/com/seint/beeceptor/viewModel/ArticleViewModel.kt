@@ -15,7 +15,7 @@ class ArticleViewModel( application: Application) : AndroidViewModel(application
 
 
     private var articleListObservable: LiveData<List<Article>> = MutableLiveData<List<Article>>()
-    fun getErrorUpdates(): LiveData<String> {
+    fun getErrorUpdates(): LiveData<Map<Int,String>> {
         return Repository.instance.getErrorData()
     }
 
