@@ -57,6 +57,7 @@ class Repository private constructor(){
 
                 if(response.code() == 200 ) {
                     data.value = response.body()
+
                 }else{
                     val message = response.errorBody()?.charStream()?.readText().toString()
                     mError.value = mapOf(Pair(1,message))
@@ -75,10 +76,65 @@ class Repository private constructor(){
 
         return data
     }
+    fun getArticleList(dataResponse : APIResponse<List<Article>>) {
+        var data = MutableLiveData<List<Article>>()
+
+        retrofitService.articleList().enqueue(object : Callback<List<Article>> {
+            override fun onResponse(call: Call<List<Article>>, response: Response<List<Article>>) {
+
+                if(response.code() == 200 ) {
+                    data.value = response.body()
+                    dataResponse.onSuccess( data)
+
+                }else{
+                    val message = response.errorBody()?.charStream()?.readText().toString()
+                    mError.value = mapOf(Pair(1,message))
+                }
+            }
+
+            override fun onFailure(call: Call<List<Article>>, t: Throwable) {
+                data.setValue(null)
+                val message = t.message.toString().let {
+                    mError.value = null
+                } as String
+                mError.value = mapOf(Pair(1,message))
+
+            }
+        })
+    }
+
     fun getErrorData(): LiveData<Map<Int,String>> {
         return mError
     }
 
+    fun getArticle(article: Article,dataResponse : APIResponse<Article>): MutableLiveData<Article> {
+        var data = MutableLiveData<Article>()
+        data.value = article
+        retrofitService.getArticle(article.id.toString()).enqueue(object : Callback<Article> {
+            override fun onResponse(call: Call<Article>, response: Response<Article>) {
+
+                if(response.code() == 200 ) {
+                    var text  = response.body()?.text
+                    data.value?.text = text?:""
+                    val liveData =data
+                    dataResponse.onSuccess(liveData)
+                }else{
+
+                    var message :String = response.errorBody()?.charStream()?.readText().toString()
+                    mError.value = mapOf(Pair(2,message))
+                }
+            }
+
+            override fun onFailure(call: Call<Article>, t: Throwable) {
+                data.setValue(null)
+                var message = t.message.toString().let {
+                    mError.value = null
+                } as String
+                mError.value = mapOf(Pair(2,message))
+            }
+        })
+        return  data
+    }
     fun getArticle(article: Article): MutableLiveData<Article> {
         var data = MutableLiveData<Article>()
         data.value = article

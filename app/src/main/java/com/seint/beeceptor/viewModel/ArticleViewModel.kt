@@ -1,7 +1,7 @@
 package com.seint.beeceptor.viewModel
 
 import android.app.Application
-import android.content.Context
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -9,19 +9,41 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.seint.beeceptor.model.Article
 import com.seint.beeceptor.retrofit.Repository
+import com.seint.beeceptor.locaDb.AppDatabase
+import com.seint.beeceptor.locaDb.LocalRepository
+import com.seint.beeceptor.locaDb.LocalSharePreference
+import com.seint.beeceptor.retrofit.APIResponse
+import java.util.*
 
 
-class ArticleViewModel( application: Application) : AndroidViewModel(application) {
+class ArticleViewModel( application: Application) : AndroidViewModel(application),
+    APIResponse<List<Article>> {
 
-
+    val localRepository : LocalRepository
     private var articleListObservable: LiveData<List<Article>> = MutableLiveData<List<Article>>()
     fun getErrorUpdates(): LiveData<Map<Int,String>> {
         return Repository.instance.getErrorData()
     }
 
     init {
-        articleListObservable = Repository.instance.getArticleList()
-        //articleListObservable = loadJSONFromAsset(application)
+        val articleDao = AppDatabase.getDataBase(application).articleDao()
+        localRepository = LocalRepository(articleDao)
+        //articleListObservable = Repository.instance.getArticleList()
+        articleListObservable = localRepository.articleList
+
+        if(isTimeToUpdate()){
+           // Repository.instance.getArticleList(this)
+            Log.i("Times Up","Time to Update")
+            //for local offline test
+            val newArticleList = loadJSONFromAsset(application).value
+            if(!newArticleList.isNullOrEmpty()){
+                localRepository.clearData()
+                localRepository.insertArticles(newArticleList)
+                articleListObservable = localRepository.articleList
+            }
+
+        }
+
     }
 
     fun getArticleListObservable(): LiveData<List<Article>> {
@@ -45,5 +67,31 @@ class ArticleViewModel( application: Application) : AndroidViewModel(application
         liveData.value  = turns
         return liveData
     }
+    fun isTimeToUpdate() :Boolean {
+        val cal: Calendar = Calendar.getInstance()
+        cal.clear(Calendar.HOUR)
+        cal.clear(Calendar.HOUR_OF_DAY)
+        cal.clear(Calendar.MINUTE)
+        cal.clear(Calendar.SECOND)
+        cal.clear(Calendar.MILLISECOND)
 
+        val now: Long = cal.getTimeInMillis()
+        val lastCheckedMillis = LocalSharePreference.getLastUpdatedTime(getApplication())
+        val diffMillis: Long = now - lastCheckedMillis
+        if (diffMillis >= 3600000 * 24){
+            LocalSharePreference.saveLastUpdateTime(getApplication(),now)
+            return true
+        }else{
+            return false
+        }
+    }
+
+    override fun onSuccess(data: LiveData<List<Article>>) {
+        val newArticleList = data.value
+        if(!newArticleList.isNullOrEmpty()){
+            localRepository.clearData()
+            localRepository.insertArticles(newArticleList)
+            articleListObservable = localRepository.articleList
+        }
+    }
 }

@@ -1,9 +1,5 @@
 package com.seint.beeceptor.view
 
-import android.app.Activity
-import android.content.Intent
-import android.graphics.Color
-import android.graphics.ColorFilter
 import android.os.Bundle
 import android.os.Handler
 import android.text.method.KeyListener
@@ -19,17 +15,19 @@ import com.seint.beeceptor.viewModel.ArticleDetailViewModel
 import com.seint.beeceptor.viewModel.ArticleViewModelFactory
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_article_detail.*
+import kotlinx.android.synthetic.main.activity_article_detail.progress_circular
+import kotlinx.android.synthetic.main.activity_main.*
 
 
 class ArticleDetailActivity : AppCompatActivity() {
 
-    private lateinit var menu: Menu
+    private  var menu: Menu? = null
     lateinit var articleDetailViewModel: ArticleDetailViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_article_detail)
-
+        progress_circular.visibility = View.VISIBLE
         makeItBeautiful()
 
         var article = intent.getSerializableExtra("ARTICLE") as? Article
@@ -39,7 +37,7 @@ class ArticleDetailActivity : AppCompatActivity() {
     }
     fun bindViewModel(article :Article){
         supportActionBar?.title = article.title
-        progress_circular.visibility = View.VISIBLE
+
 
         Picasso.get().load(article.avatar).placeholder(R.drawable.loadinganimation).error(R.drawable.error).into(imgAvator)
 
@@ -51,15 +49,16 @@ class ArticleDetailActivity : AppCompatActivity() {
                 ArticleDetailViewModel::class.java
             )
         articleDetailViewModel.getArticle().observe(this, Observer {
+            if (it != null) {
+                tvArticle.setText(it.text)
+            }
             val handler = Handler()
             handler.postDelayed(Runnable {
-                if (it != null) {
-                    tvArticle.setText(it.text)
-                }
                 progress_circular.visibility = View.GONE
-                menu.findItem(R.id.edit).setEnabled(true)
-            }, 2000     )
+            }, 3000     )
 
+            progress_circular.visibility = View.GONE
+            menu?.findItem(R.id.edit)?.setEnabled(true)
 
         })
 
@@ -67,8 +66,8 @@ class ArticleDetailActivity : AppCompatActivity() {
 
             if (!it.isNullOrEmpty()){
                 if(it.containsKey(2)){
-                    menu.findItem(R.id.edit).setEnabled(false)
-                    showErrorDialog(this,"Error",message = it.get(2) as String)
+                    menu?.findItem(R.id.edit)?.setEnabled(false)
+                    showDialogWindow(this,"Error",message = it.get(2) as String)
                 }
             }
             progress_circular.visibility = View.GONE
@@ -80,19 +79,18 @@ class ArticleDetailActivity : AppCompatActivity() {
         tvArticle.setBackgroundColor(resources.getColor(R.color.colorTransparent))
         btnSave.visibility =View.GONE
         btnSave.setOnClickListener {
-            var article = articleDetailViewModel.getArticle().value
+            val article = articleDetailViewModel.getArticle().value
             article?.text = tvArticle.text.toString()
-            var resultIntent = Intent()
-            resultIntent.putExtra("ARTICLE",article)
-            setResult(Activity.RESULT_OK, resultIntent)
-
+            article?.let { it1 -> articleDetailViewModel.updateArticle(it1) }
             finish()
         }
 
     }
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        getMenuInflater().inflate(R.menu.menu, menu);
-        this.menu = menu!!
+        getMenuInflater().inflate(R.menu.menu, menu)
+        if (menu != null) {
+            this.menu = menu
+        }
         return super.onCreateOptionsMenu(menu)
     }
 
@@ -101,14 +99,14 @@ class ArticleDetailActivity : AppCompatActivity() {
 
         if (id == R.id.edit) {
             item.setVisible(false)
-            menu.findItem(R.id.cancel).setVisible(true)
+            menu?.findItem(R.id.cancel)?.setVisible(true)
             tvArticle.setKeyListener(tvArticle.getTag() as KeyListener)
             tvArticle.setBackgroundColor(resources.getColor(R.color.colorGrey))
             tvArticle.requestFocus()
             btnSave.visibility =View.VISIBLE
 
         }else if (id == R.id.cancel){
-            menu.findItem(R.id.edit).setVisible(false)
+            menu?.findItem(R.id.edit)?.setVisible(false)
             finish()
         }
         return super.onOptionsItemSelected(item)

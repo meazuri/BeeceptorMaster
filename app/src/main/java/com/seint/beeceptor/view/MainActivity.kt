@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.seint.beeceptor.R
 import com.seint.beeceptor.viewModel.ArticleViewModel
-import kotlinx.android.synthetic.main.activity_article_detail.*
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_main.progress_circular
 
@@ -57,7 +56,7 @@ class MainActivity : AppCompatActivity() {
 
              if (!it.isNullOrEmpty()){
                  if(it.containsKey(1)){
-                     showErrorDialog(this,"Error",message = it.get(1) as String)
+                     showDialogWindow(this,"Error",message = it.get(1) as String)
 
                  }
 

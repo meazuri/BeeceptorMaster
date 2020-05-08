@@ -8,7 +8,7 @@ import android.content.DialogInterface
 
 
 
-fun showErrorDialog(context : Context , title: String, message : String){
+fun showDialogWindow(context : Context, title: String, message : String){
 
     AlertDialog.Builder(context)
         .setTitle(title)
@@ -16,6 +16,6 @@ fun showErrorDialog(context : Context , title: String, message : String){
         .setPositiveButton(R.string.ok,
             DialogInterface.OnClickListener { dialog, which ->
             })
-        .setIcon(R.drawable.ic_dialog_alert)
+        .setIcon(R.drawable.ic_dialog_info)
         .show()
 }

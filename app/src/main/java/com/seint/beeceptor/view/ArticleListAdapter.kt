@@ -47,7 +47,7 @@ class ArticleListAdapter(private val context: Context) : RecyclerView.Adapter<Ar
             itemView?.setOnClickListener {
                 var intent = Intent(context,ArticleDetailActivity::class.java)
                 intent.putExtra("ARTICLE",articleList.get(dataPosition))
-                context.startActivity(intent)
+                (context as MainActivity).startActivityForResult(intent ,1)
             }
         }
     }
