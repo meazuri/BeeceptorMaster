@@ -1,5 +1,6 @@
 package com.seint.beeceptor.view
 
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.view.View
@@ -31,6 +32,7 @@ class MainActivity : AppCompatActivity() {
         recyclerView.adapter = mAdapter
         recyclerView.isNestedScrollingEnabled = false
 
+
         progress_circular.visibility = View.VISIBLE
         articleViewModel = ViewModelProviders.of(this).get(ArticleViewModel::class.java)
 
@@ -46,7 +48,7 @@ class MainActivity : AppCompatActivity() {
                     }
 
                     progress_circular.visibility = View.GONE
-                }, 5000     )
+                }, 3000     )
 
 
         })
@@ -62,5 +64,9 @@ class MainActivity : AppCompatActivity() {
              }
             progress_circular.visibility = View.GONE
         })
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
     }
 }

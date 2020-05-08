@@ -5,5 +5,10 @@
         android:id="@+id/edit"
         android:title="Edit"
         app:showAsAction="always"/>
+    <item
+        android:id="@+id/cancel"
+        android:title="Cancel"
+        android:visible="false"
+        app:showAsAction="always"/>
 
 </menu>
